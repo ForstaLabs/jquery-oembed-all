@@ -882,10 +882,14 @@
             {templateRegex: /.*doc\/([^/]+).*/, embedtag: {tag: 'iframe', width: '100%', height: 600}}),
         new $.fn.oembed.OEmbedProvider("kickstarter", "rich", ["kickstarter\\.com/projects/.+"], "$1/widget/card.html",
             {templateRegex: /([^?]+).*/, embedtag: {tag: 'iframe', width: '220', height: 380}}),
-        new $.fn.oembed.OEmbedProvider("amazon", "rich", ["amzn.com/B+", "amazon.com.*/(B\\S+)($|\\/.*)"], "https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=_APIKEY_&marketplace=amazon&region=US&asins=$1&show_border=false", {
+        new $.fn.oembed.OEmbedProvider("amazon", "rich", ["amzn.com/B+", "amazon.com.*/(B\\S+)($|\\/.*)"], "https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=_APIKEY_&marketplace=amazon&region=US&asins=$1&show_border=false",
+            {
                 apikey: true,
                 templateRegex: /.*\/(B[0-9A-Z]+)($|\/.*)/,
-                embedtag: {tag: 'iframe'}
+                embedtag: {
+                    tag: 'iframe',
+                    width: '120px',
+                    height: '240px'}
             }),
         new $.fn.oembed.OEmbedProvider("slideshare", "rich", ["slideshare.net"], "//www.slideshare.net/api/oembed/2", {format: 'jsonp'}),
         new $.fn.oembed.OEmbedProvider("roomsharejp", "rich", ["roomshare\\.jp/(en/)?post/.*"], "http://roomshare.jp/oembed.json"),
