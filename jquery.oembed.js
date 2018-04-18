@@ -249,7 +249,7 @@
                     oembedData.code = result;
                     success(oembedData, externalUrl, container);
                 },
-                error: settings.onError.call(container, externalUrl, embedProvider)
+                error: e => settings.onError.call(container, e, externalUrl, embedProvider)
             }, settings.ajaxOptions || {});
             $.ajax(ajaxopts);
         } else if (embedProvider.templateRegex) {
@@ -755,13 +755,18 @@
                     flashvars: "base=http://togo.ebay.com/togo/&lang=en-us&mode=normal&itemid=$2&query=$1"
                 }
             }),
-        new $.fn.oembed.OEmbedProvider("wikipedia", "rich", ["wikipedia.org/wiki/.+"], "http://$1.wikipedia.org/w/api.php?action=parse&page=$2&format=json&section=0&callback=?", {
+        new $.fn.oembed.OEmbedProvider("wikipedia", "rich", ["wikipedia.org/wiki/.+"],
+            "https://$1.wikipedia.org/w/api.php?action=parse&page=$2&format=json&section=0&prop=text|displaytitle&callback=?", {
             templateRegex: /.*\/\/([\w]+).*\/wiki\/([^\/]+).*/,
             templateData: function (data) {
                 if (!data.parse)
                     return false;
-                var text = data.parse['text']['*'].replace(/href="\/wiki/g, 'href="http://en.wikipedia.org/wiki');
-                return  '<div id="content"><h3><a class="nav-link" href="http://en.wikipedia.org/wiki/' + data.parse['displaytitle'] + '">' + data.parse['displaytitle'] + '</a></h3>' + text + '</div>';
+                var text = data.parse.text['*'].replace(/href="\/wiki/g, 'href="https://en.wikipedia.org/wiki');
+                return  `<div id="content"><h3>` +
+                            `<a class="nav-link" href="https://en.wikipedia.org/wiki/${data.parse.displaytitle}">` +
+                                `${data.parse.displaytitle}` +
+                            `</a></h3>${text}` +
+                        `</div>`;
             }
         }),
         new $.fn.oembed.OEmbedProvider("imdb", "rich", ["imdb.com/title/.+"], "http://www.imdbapi.com/?i=$1&callback=?",
