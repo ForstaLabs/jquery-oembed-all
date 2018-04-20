@@ -11,8 +11,9 @@
 (function ($) {
     $.fn.oembed = function (url, options, embedAction) {
         const settings = $.extend(/*deep*/ true, {}, defaults, options);
-        if ($('#jqoembeddata').length === 0) $('<span id="jqoembeddata"></span>').appendTo('body');
-
+        if ($('#jqoembeddata').length === 0) {
+            $('<span id="jqoembeddata"></span>').appendTo('body');
+        }
         return this.each(function () {
             var container = $(this),
                 resourceURL = (url && (!url.indexOf('http://') || !url.indexOf('https://'))) ? url : container.attr("href"),
@@ -370,9 +371,9 @@
         for (var i = 0; i < $.fn.oembed.providers.length; i++) {
             for (var j = 0, l = $.fn.oembed.providers[i].urlschemes.length; j < l; j++) {
                 var regExp = new RegExp($.fn.oembed.providers[i].urlschemes[j], "i");
-
-                if (url.match(regExp) !== null)
+                if (url.match(regExp) !== null) {
                     return $.fn.oembed.providers[i];
+                }
             }
         }
         return null;
@@ -387,9 +388,7 @@
         this.maxWidth = 500;
         this.maxHeight = 400;
         extraSettings = extraSettings || {};
-
         if (extraSettings.useYQL) {
-
             if (extraSettings.useYQL == 'xml') {
                 extraSettings.yql = {
                     xpath: "//oembed/html",
@@ -420,7 +419,6 @@
             this.apiendpoint = null;
         }
 
-
         for (var property in extraSettings) {
             this[property] = extraSettings[property];
         }
@@ -428,8 +426,6 @@
         this.format = this.format || 'json';
         this.callbackparameter = this.callbackparameter || "callback";
         this.embedtag = this.embedtag || {tag: ""};
-
-
     };
 
     /*
