@@ -858,7 +858,10 @@
         new $.fn.oembed.OEmbedProvider("mapjam", "rich", ["mapjam\\.com/.+"], "http://www.mapjam.com/$1", {templateRegex: /.*mapjam\.com\/(.*)/, embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("polar", "rich", ["polarb\\.com/.+"], "http://assets-polarb-com.a.ssl.fastly.net/api/v4/publishers/unknown/embedded_polls/iframe?poll_id=$1", {templateRegex: /.*polarb\.com\/polls\/(\w+).*/, embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("ponga", "rich", ["ponga\\.com/.+"], "https://www.ponga.com/embedded?id=$1", {templateRegex: [/.*ponga\.com\/embedded\?id=(\w+).*/, /.*ponga\.com\/(\w+).*/], embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
-
+        new $.fn.oembed.OEmbedProvider("xkcd", "rich", ["xkcd\\.com/.+"], "//dynamic.xkcd.com/api-0/jsonp/comic/$1?callback=?", {
+            templateRegex: /.*xkcd\.com\/([0-9]+)\/?.*/,
+            templateData: data => `<img src="${data.img}" title="${data.alt}" style="max-width: 100%"/>`
+        }),
         //Use Open Graph Where applicable
         new $.fn.oembed.OEmbedProvider("opengraph", "rich", [".*"], null,
             {
