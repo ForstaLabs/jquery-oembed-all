@@ -174,7 +174,7 @@
                     oembedData.code = result;
                     success(oembedData, externalUrl, container, settings);
                 },
-                error: e => settings.onError.call(container, e, externalUrl, embedProvider)
+                error: (xhr, statusText, error) => settings.onError.call(container, e, externalUrl, embedProvider)
             }, settings.ajaxOptions || {});
             $.ajax(ajaxopts);
         } else if (embedProvider.templateRegex) {
@@ -217,18 +217,23 @@
                 //Add APIkey if true
                 if (embedProvider.apikey)
                     embedProvider.apiendpoint = embedProvider.apiendpoint.replace('_APIKEY_', settings.apikeys[embedProvider.name]);
-
-                ajaxopts = $.extend({
-                    url: externalUrl.replace(embedProvider.templateRegex, embedProvider.apiendpoint),
-                    dataType: 'jsonp',
-                    success: function (data) {
+                const url = externalUrl.replace(embedProvider.templateRegex, embedProvider.apiendpoint);
+                const onSuccess = data => {
                         var oembedData = $.extend({}, data);
                         oembedData.code = embedProvider.templateData(data);
                         success(oembedData, externalUrl, container, settings);
-                    },
-                    error: e => settings.onError.call(container, e, externalUrl, embedProvider)
-                }, settings.ajaxOptions || {});
-                $.ajax(ajaxopts);
+                };
+                if (embedProvider.method === 'fetch') {
+                    fetch(url).then(r => r.json().then(onSuccess)).catch(e => settings.onError.call(container, e, externalUrl, embedProvider));
+                } else {
+                    ajaxopts = $.extend({
+                        url,
+                        dataType: 'jsonp',
+                        success: onSuccess,
+                        error: (xhr, statusText, e) => settings.onError.call(container, e, externalUrl, embedProvider)
+                    }, settings.ajaxOptions || {});
+                    $.ajax(ajaxopts);
+                }
             } else {
                 success({code: externalUrl.replace(embedProvider.templateRegex, embedProvider.template)}, externalUrl, container, settings);
             }
@@ -255,7 +260,7 @@
                     }
                     success(oembedData, externalUrl, container, settings);
                 },
-                error: e => settings.onError.call(container, e, externalUrl, embedProvider)
+                error: (xhr, statusText, e) => settings.onError.call(container, e, externalUrl, embedProvider)
             }, settings.ajaxOptions || {});
             $.ajax(ajaxopts);
         }
@@ -556,29 +561,29 @@
                         + '<p class="oembedall-updated-at">Last updated: ' + data.data.pushed_at + '</p></div></div>';
                 }
             }),
-        new $.fn.oembed.OEmbedProvider("stackoverflow", "rich", ["stackoverflow.com/questions/[\\d]+"], "//api.stackoverflow.com/1.1/questions/$1?body=true&jsonp=?"
-            , {templateRegex: /.*questions\/([\d]+).*/,
-                templateData: function (data) {
-                    if (!data.questions)
-                        return false;
-                    var q = data.questions[0];
-                    var body = $(q.body).text();
-                    var out = '<div class="oembedall-stoqembed"><div class="oembedall-statscontainer"><div class="oembedall-statsarrow"></div><div class="oembedall-stats"><div class="oembedall-vote"><div class="oembedall-votes">'
-                        + '<span class="oembedall-vote-count-post"><strong>' + (q.up_vote_count - q.down_vote_count) + '</strong></span><div class="oembedall-viewcount">vote(s)</div></div>'
-                        + '</div><div class="oembedall-status"><strong>' + q.answer_count + '</strong>answer</div></div><div class="oembedall-views">' + q.view_count + ' view(s)</div></div>'
-                        + '<div class="oembedall-summary"><h3><a class="oembedall-question-hyperlink" href="//stackoverflow.com/questions/' + q.question_id + '/">' + q.title + '</a></h3>'
-                        + '<div class="oembedall-excerpt">' + body.substring(0, 100) + '...</div><div class="oembedall-tags">';
-                    for (const i in q.tags) {
-                        out += '<a title="" class="oembedall-post-tag" href="//stackoverflow.com/questions/tagged/' + q.tags[i] + '">' + q.tags[i] + '</a>';
-                    }
-
-                    out += '</div><div class="oembedall-fr"><div class="oembedall-user-info"><div class="oembedall-user-gravatar32"><a href="//stackoverflow.com/users/' + q.owner.user_id + '/' + q.owner.display_name + '">'
-                        + '<img width="32" height="32" alt="" src="//www.gravatar.com/avatar/' + q.owner.email_hash + '?s=32&amp;d=identicon&amp;r=PG"></a></div><div class="oembedall-user-details">'
-                        + '<a href="//stackoverflow.com/users/' + q.owner.user_id + '/' + q.owner.display_name + '">' + q.owner.display_name + '</a><br><span title="reputation score" class="oembedall-reputation-score">'
-                        + q.owner.reputation + '</span></div></div></div></div></div>';
-                    return out;
+        new $.fn.oembed.OEmbedProvider("stackexchange", "rich", ["stackoverflow.com/questions/[\\d]+"],
+                                       "https://api.stackexchange.com/2.2/questions/$1?site=stackoverflow.com&callback=?", {
+            templateRegex: /.*questions\/([\d]+).*/,
+            templateData: function (data) {
+                if (!data.items)
+                    return false;
+                var q = data.items[0];
+                var out = '<div class="oembedall-stoqembed"><div class="oembedall-statscontainer"><div class="oembedall-statsarrow"></div><div class="oembedall-stats"><div class="oembedall-vote"><div class="oembedall-votes">'
+                    + '<span class="oembedall-vote-count-post"><strong>' + (q.score) + '</strong></span><div class="oembedall-viewcount">vote(s)</div></div>'
+                    + '</div><div class="oembedall-status"><strong>' + q.answer_count + '</strong>answer</div></div><div class="oembedall-views">' + q.view_count + ' view(s)</div></div>'
+                    + '<div class="oembedall-summary"><h3><a class="oembedall-question-hyperlink" href="//stackoverflow.com/questions/' + q.question_id + '/">' + q.title + '</a></h3>'
+                    + '<div class="oembedall-excerpt">' + q.title.substring(0, 100) + '...</div><div class="oembedall-tags">';
+                for (const i in q.tags) {
+                    out += '<a title="" class="oembedall-post-tag" href="//stackoverflow.com/questions/tagged/' + q.tags[i] + '">' + q.tags[i] + '</a>';
                 }
-            }),
+
+                out += '</div><div class="oembedall-fr"><div class="oembedall-user-info"><div class="oembedall-user-gravatar32"><a href="//stackoverflow.com/users/' + q.owner.user_id + '/' + q.owner.display_name + '">'
+                    + '<img width="32" height="32" alt="" src="//www.gravatar.com/avatar/' + q.owner.email_hash + '?s=32&amp;d=identicon&amp;r=PG"></a></div><div class="oembedall-user-details">'
+                    + '<a href="//stackoverflow.com/users/' + q.owner.user_id + '/' + q.owner.display_name + '">' + q.owner.display_name + '</a><br><span title="reputation score" class="oembedall-reputation-score">'
+                    + q.owner.reputation + '</span></div></div></div></div></div>';
+                return out;
+            }
+        }),
         new $.fn.oembed.OEmbedProvider("kickstarter", "rich", ["kickstarter\\.com/projects/.+"], "$1/widget/card.html",
             {templateRegex: /([^?]+).*/, embedtag: {tag: 'iframe', width: '220', height: 380}}),
         new $.fn.oembed.OEmbedProvider("amazon", "rich", ["amzn.com/B+", "amazon.com.*/(B\\S+)($|\\/.*)"], "https://ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=_APIKEY_&marketplace=amazon&region=US&asins=$1&show_border=false",
@@ -621,7 +626,8 @@
         new $.fn.oembed.OEmbedProvider("googleviews", "rich", ["(.*maps\\.google\\.com\\/maps\\?).+(output=svembed).+(cbp=(.*)).*"], "https://maps.google.com/maps?layer=c&panoid=$3&ie=UTF8&source=embed&output=svembed&cbp=$5", {templateRegex: /(.*maps\.google\.com\/maps\?).+(panoid=(\w+)&).*(cbp=(.*)).*/, embedtag: {tag: 'iframe', width: 480, height: 360}, nocache: 1 }),
         new $.fn.oembed.OEmbedProvider("googlemaps", "rich", ["google\\.com/maps/place/.+"], "//maps.google.com/maps?t=m&q=$1&output=embed", {templateRegex: /.*google\.com\/maps\/place\/([\w+]*)\/.*/, embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("ponga", "rich", ["ponga\\.com/.+"], "https://www.ponga.com/embedded?id=$1", {templateRegex: [/.*ponga\.com\/embedded\?id=(\w+).*/, /.*ponga\.com\/(\w+).*/], embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
-        new $.fn.oembed.OEmbedProvider("xkcd", "rich", ["xkcd\\.com/.+"], "//dynamic.xkcd.com/api-0/jsonp/comic/$1?callback=?", {
+        new $.fn.oembed.OEmbedProvider("xkcd", "rich", ["xkcd\\.com/.+"], "https://xkcd.now.sh/$1", {
+            method: 'fetch',
             templateRegex: /.*xkcd\.com\/([0-9]+)\/?.*/,
             templateData: data => `<img src="${data.img}" title="${data.alt}" style="max-width: 100%"/>`
         }),
