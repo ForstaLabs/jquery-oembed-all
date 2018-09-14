@@ -120,7 +120,7 @@
             if (from == 'html')
                 query += " and compat='html5'";
             var ajaxopts = $.extend({
-                url: "//query.yahooapis.com/v1/public/yql",
+                url: "https://query.yahooapis.com/v1/public/yql",
                 dataType: 'jsonp',
                 data: {
                     q: query,
@@ -174,7 +174,7 @@
                     oembedData.code = result;
                     success(oembedData, externalUrl, container, settings);
                 },
-                error: (xhr, statusText, error) => settings.onError.call(container, e, externalUrl, embedProvider)
+                error: (xhr, statusText, error) => settings.onError.call(container, error, externalUrl, embedProvider)
             }, settings.ajaxOptions || {});
             $.ajax(ajaxopts);
         } else if (embedProvider.templateRegex) {
@@ -475,21 +475,21 @@
         }),
         new $.fn.oembed.OEmbedProvider("funnyordie", "video", ["funnyordie\\.com/videos/.+"], '//www.funnyordie.com/embed/$1', {
             templateRegex: /.*videos\/([^/]+)\/([^/]+)?/, embedtag: {tag:'iframe', width: '300', height: '200'}, nocache: true}),
-        new $.fn.oembed.OEmbedProvider("blip", "video", ["blip\\.tv/.+"], "//blip.tv/oembed/"),
-        new $.fn.oembed.OEmbedProvider("hulu", "video", ["hulu\\.com/watch/.*"], "//www.hulu.com/api/oembed.json"),
-        new $.fn.oembed.OEmbedProvider("vimeo", "video", ["www.vimeo.com/groups/.*/videos/.*", "www.vimeo.com/.*", "vimeo.com/groups/.*/videos/.*", "vimeo.com/.*"], "//vimeo.com/api/oembed.json"),
+        new $.fn.oembed.OEmbedProvider("blip", "video", ["blip\\.tv/.+"], "https://blip.tv/oembed/"),
+        new $.fn.oembed.OEmbedProvider("hulu", "video", ["hulu\\.com/watch/.*"], "https://www.hulu.com/api/oembed.json"),
+        new $.fn.oembed.OEmbedProvider("vimeo", "video", ["www.vimeo.com/groups/.*/videos/.*", "www.vimeo.com/.*", "vimeo.com/groups/.*/videos/.*", "vimeo.com/.*"], "https://vimeo.com/api/oembed.json"),
         new $.fn.oembed.OEmbedProvider("dailymotion", "video", ["dailymotion\\.com/.+"], '//www.dailymotion.com/services/oembed'),
         new $.fn.oembed.OEmbedProvider("vine", "video", ["vine.co/v/.*"], null,
             {
                 templateRegex: /https?:\/\/w?w?w?.?vine\.co\/v\/([a-zA-Z0-9]*).*/,
                 template: '<iframe src="https://vine.co/v/$1/embed/postcard" width="600" height="600" allowfullscreen="true" allowscriptaccess="always" scrolling="no" frameborder="0"></iframe>' +
-                    '<script async src="//platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>',
+                    '<script async src="https://platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>',
                 nocache: 1
             }),
 
         //Audio
         new $.fn.oembed.OEmbedProvider("Spotify", "rich", ["open.spotify.com/(track|album|user)/"], "https://embed.spotify.com/oembed/"),
-        new $.fn.oembed.OEmbedProvider("Soundcloud", "rich", ["soundcloud.com/.+", "snd.sc/.+"], "//soundcloud.com/oembed", {format: 'js'}),
+        new $.fn.oembed.OEmbedProvider("Soundcloud", "rich", ["soundcloud.com/.+", "snd.sc/.+"], "https://soundcloud.com/oembed", {format: 'js'}),
         new $.fn.oembed.OEmbedProvider("bandcamp", "rich", ["bandcamp\\.com/album/.+"], null,
             {
                 yql: {
@@ -502,14 +502,14 @@
             }),
 
         //Photo
-        new $.fn.oembed.OEmbedProvider("deviantart", "photo", ["deviantart.com/.+", "fav.me/.+", "deviantart.com/.+"], "//backend.deviantart.com/oembed", {format: 'jsonp'}),
-        new $.fn.oembed.OEmbedProvider("flickr", "photo", ["flickr\\.com/photos/.+"], "//flickr.com/services/oembed", {callbackparameter: 'jsoncallback'}),
-        new $.fn.oembed.OEmbedProvider("instagram", "photo", ["instagr\\.?am(\\.com)?/.+"], "//api.instagram.com/oembed"),
+        new $.fn.oembed.OEmbedProvider("deviantart", "photo", ["deviantart.com/.+", "fav.me/.+", "deviantart.com/.+"], "https://backend.deviantart.com/oembed", {format: 'jsonp'}),
+        new $.fn.oembed.OEmbedProvider("flickr", "photo", ["flickr\\.com/photos/.+"], "https://flickr.com/services/oembed", {callbackparameter: 'jsoncallback'}),
+        new $.fn.oembed.OEmbedProvider("instagram", "photo", ["instagr\\.?am(\\.com)?/.+"], "https://api.instagram.com/oembed"),
         new $.fn.oembed.OEmbedProvider("circuitlab", "photo", ["circuitlab.com/circuit/.+"], "https://www.circuitlab.com/circuit/$1/screenshot/540x405/",
             {templateRegex: /.*circuit\/([^/]+).*/, embedtag: {tag: 'img'}, nocache: 1}),
-        new $.fn.oembed.OEmbedProvider("img.ly", "photo", ["img\\.ly/.+"], "//img.ly/show/thumb/$1",
+        new $.fn.oembed.OEmbedProvider("img.ly", "photo", ["img\\.ly/.+"], "https://img.ly/show/thumb/$1",
             {templateRegex: /.*ly\/([^/]+).*/, embedtag: {tag: 'img'}, nocache: 1}),
-        new $.fn.oembed.OEmbedProvider("imgur.com", "photo", ["imgur\\.com/gallery/.+"], "//imgur.com/$1l.jpg",
+        new $.fn.oembed.OEmbedProvider("imgur.com", "photo", ["imgur\\.com/gallery/.+"], "https://imgur.com/$1l.jpg",
             {templateRegex: /.*gallery\/([^/]+).*/, embedtag: {tag: 'img'}, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("visual.ly", "rich", ["visual\\.ly/.+"], null,
             {
@@ -522,7 +522,7 @@
         //Rich
         new $.fn.oembed.OEmbedProvider("twitter", "rich", ["twitter.com/.+"], "https://api.twitter.com/1/statuses/oembed.json"),
         new $.fn.oembed.OEmbedProvider("documentcloud", "rich", ["documentcloud.org/documents/.+"], "https://www.documentcloud.org/api/oembed.json"),
-        new $.fn.oembed.OEmbedProvider("meetup", "rich", ["meetup\\.(com|ps)/.+"], "//api.meetup.com/oembed"),
+        new $.fn.oembed.OEmbedProvider("meetup", "rich", ["meetup\\.(com|ps)/.+"], "https://api.meetup.com/oembed"),
         new $.fn.oembed.OEmbedProvider("wikipedia", "rich", ["wikipedia.org/wiki/.+"],
             "https://$1.wikipedia.org/w/api.php?action=parse&page=$2&format=json&section=0&prop=text|displaytitle&callback=?", {
                 templateRegex: /.*\/\/([\w]+).*\/wiki\/([^/]+).*/,
@@ -542,13 +542,13 @@
             }),
         new $.fn.oembed.OEmbedProvider("jsfiddle", "rich", ["jsfiddle.net/.+"], "https://jsfiddle.net/$1/$2/embedded/js,resources,html,css/?",
             {templateRegex: /.*net\/([^/]+)\/([^/]+)\/?.*/, embedtag: {tag: 'iframe', width: '100%', height: '300' }}),
-        new $.fn.oembed.OEmbedProvider("jsbin", "rich", ["jsbin.com/.+"], "//jsbin.com/$1/?",
+        new $.fn.oembed.OEmbedProvider("jsbin", "rich", ["jsbin.com/.+"], "https://jsbin.com/$1/?",
             {templateRegex: /.*com\/([^/]+).*/, embedtag: {tag: 'iframe', width: '100%', height: '300' }}),
         new $.fn.oembed.OEmbedProvider("jotform", "rich", ["form.jotform.co/form/.+"], "$1?",
             {templateRegex: /(.*)/, embedtag: {tag: 'iframe', width: '100%', height: '507' }}),
         new $.fn.oembed.OEmbedProvider("linkedin", "rich", ["linkedin.com/pub/.+"], "https://www.linkedin.com/cws/member/public_profile?public_profile_url=$1&format=inline&isFramed=true",
             {templateRegex: /(.*)/, embedtag: {tag: 'iframe', width: '368px', height: 'auto'}}),
-        new $.fn.oembed.OEmbedProvider("pastebin", "rich", ["pastebin\\.com/[\\S]{8}"], "//pastebin.com/embed_iframe.php?i=$1",
+        new $.fn.oembed.OEmbedProvider("pastebin", "rich", ["pastebin\\.com/[\\S]{8}"], "https://pastebin.com/embed_iframe.php?i=$1",
             {templateRegex: /.*\/(\S{8}).*/, embedtag: {tag: 'iframe', width: '100%', height: 'auto'}}),
         new $.fn.oembed.OEmbedProvider("pastie", "rich", ["pastie\\.org/pastes/.+"], null, {yql: {xpath: '//pre[@class="textmate-source"]'}}),
         new $.fn.oembed.OEmbedProvider("github", "rich", ["gist.github.com/.+"], "https://github.com/api/oembed"),
@@ -567,21 +567,36 @@
             templateData: function (data) {
                 if (!data.items)
                     return false;
-                var q = data.items[0];
-                var out = '<div class="oembedall-stoqembed"><div class="oembedall-statscontainer"><div class="oembedall-statsarrow"></div><div class="oembedall-stats"><div class="oembedall-vote"><div class="oembedall-votes">'
-                    + '<span class="oembedall-vote-count-post"><strong>' + (q.score) + '</strong></span><div class="oembedall-viewcount">vote(s)</div></div>'
-                    + '</div><div class="oembedall-status"><strong>' + q.answer_count + '</strong>answer</div></div><div class="oembedall-views">' + q.view_count + ' view(s)</div></div>'
-                    + '<div class="oembedall-summary"><h3><a class="oembedall-question-hyperlink" href="//stackoverflow.com/questions/' + q.question_id + '/">' + q.title + '</a></h3>'
-                    + '<div class="oembedall-excerpt">' + q.title.substring(0, 100) + '...</div><div class="oembedall-tags">';
-                for (const i in q.tags) {
-                    out += '<a title="" class="oembedall-post-tag" href="//stackoverflow.com/questions/tagged/' + q.tags[i] + '">' + q.tags[i] + '</a>';
-                }
-
-                out += '</div><div class="oembedall-fr"><div class="oembedall-user-info"><div class="oembedall-user-gravatar32"><a href="//stackoverflow.com/users/' + q.owner.user_id + '/' + q.owner.display_name + '">'
-                    + '<img width="32" height="32" alt="" src="//www.gravatar.com/avatar/' + q.owner.email_hash + '?s=32&amp;d=identicon&amp;r=PG"></a></div><div class="oembedall-user-details">'
-                    + '<a href="//stackoverflow.com/users/' + q.owner.user_id + '/' + q.owner.display_name + '">' + q.owner.display_name + '</a><br><span title="reputation score" class="oembedall-reputation-score">'
-                    + q.owner.reputation + '</span></div></div></div></div></div>';
-                return out;
+                const q = data.items[0];
+                return [
+                    `<div class="oembedall-stoqembed">`,
+                        `<div class="oembedall-statscontainer">`,
+                            `<div class="oembedall-stats">`,
+                                `<div class="oe-box oe-votes">`,
+                                    `<div class="oe-score">${q.score}</div>`,
+                                    `<div class="oe-label">upvote(s)</div>`,
+                                `</div>`,
+                                `<div class="oe-box oe-status">`,
+                                    `<strong>${q.answer_count}</strong>`,
+                                    `<div class="oe-label">answer(s)</div>`,
+                                `</div>`,
+                            `</div>`,
+                            `<div class="oembedall-views">${q.view_count} view(s)</div>`,
+                        `</div>`,
+                        `<div class="oembedall-summary">`,
+                            `<a class="oembedall-question-hyperlink" href="https://stackoverflow.com/questions/${q.question_id}/">${q.title}</a>`,
+                            `<div class="oembedall-tags">`,
+                                q.tags.map(x => `<a class="oembedall-post-tag" href="https://stackoverflow.com/questions/tagged/${x}">${x}</a>`).join(''),
+                            `</div>`,
+                        `</div>`,
+                        `<div class="oembedall-user-info">`,
+                            `<a class="oe-gravatar" title="Asked by ${q.owner.display_name}"`,
+                               `href="https://stackoverflow.com/users/${q.owner.user_id}/${q.owner.display_name}">`,
+                                `<img width="32" height="32" src="https://www.gravatar.com/avatar/${q.owner.email_hash}?s=32&d=identicon"/>`,
+                            `</a>`,
+                        `</div>`,
+                    `</div>`
+                ].join('');
             }
         }),
         new $.fn.oembed.OEmbedProvider("kickstarter", "rich", ["kickstarter\\.com/projects/.+"], "$1/widget/card.html",
@@ -595,19 +610,7 @@
                     width: '120px',
                     height: '240px'}
             }),
-        new $.fn.oembed.OEmbedProvider("slideshare", "rich", ["slideshare.net"], "//www.slideshare.net/api/oembed/2", {format: 'jsonp'}),
-        new $.fn.oembed.OEmbedProvider("lanyard", "rich", ["lanyrd.com/\\d+/.+"], null,
-            {
-                yql: {
-                    xpath: '(//div[@class="primary"])[1]',
-                    from: 'htmlstring',
-                    datareturn: function (results) {
-                        if (!results.result)
-                            return false;
-                        return '<div class="oembedall-lanyard">' + results.result + '</div>';
-                    }
-                }
-            }),
+        new $.fn.oembed.OEmbedProvider("slideshare", "rich", ["slideshare.net"], "https://www.slideshare.net/api/oembed/2", {format: 'jsonp'}),
         new $.fn.oembed.OEmbedProvider("asciiartfarts", "rich", ["asciiartfarts.com/\\d+.html"], null,
             {
                 yql: {
@@ -624,7 +627,7 @@
             templateRegex: /(.*)/,
             template: '<iframe src="$1" allowtransparency="true" scrolling="no" width="615px" frameborder="0" height="625px"></iframe>'}),
         new $.fn.oembed.OEmbedProvider("googleviews", "rich", ["(.*maps\\.google\\.com\\/maps\\?).+(output=svembed).+(cbp=(.*)).*"], "https://maps.google.com/maps?layer=c&panoid=$3&ie=UTF8&source=embed&output=svembed&cbp=$5", {templateRegex: /(.*maps\.google\.com\/maps\?).+(panoid=(\w+)&).*(cbp=(.*)).*/, embedtag: {tag: 'iframe', width: 480, height: 360}, nocache: 1 }),
-        new $.fn.oembed.OEmbedProvider("googlemaps", "rich", ["google\\.com/maps/place/.+"], "//maps.google.com/maps?t=m&q=$1&output=embed", {templateRegex: /.*google\.com\/maps\/place\/([\w+]*)\/.*/, embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
+        new $.fn.oembed.OEmbedProvider("googlemaps", "rich", ["google\\.com/maps/place/.+"], "https://maps.google.com/maps?t=m&q=$1&output=embed", {templateRegex: /.*google\.com\/maps\/place\/([\w+]*)\/.*/, embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("ponga", "rich", ["ponga\\.com/.+"], "https://www.ponga.com/embedded?id=$1", {templateRegex: [/.*ponga\.com\/embedded\?id=(\w+).*/, /.*ponga\.com\/(\w+).*/], embedtag: {tag: 'iframe', width: 480, height: 360 }, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("xkcd", "rich", ["xkcd\\.com/.+"], "https://xkcd.now.sh/$1", {
             method: 'fetch',
