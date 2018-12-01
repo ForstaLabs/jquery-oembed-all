@@ -520,7 +520,7 @@
             }),
 
         //Rich
-        new $.fn.oembed.OEmbedProvider("twitter", "rich", ["twitter.com/.+"], "https://api.twitter.com/1/statuses/oembed.json"),
+        new $.fn.oembed.OEmbedProvider("twitter", "rich", ["twitter.com/.+"], "https://publish.twitter.com/oembed"),
         new $.fn.oembed.OEmbedProvider("documentcloud", "rich", ["documentcloud.org/documents/.+"], "https://www.documentcloud.org/api/oembed.json"),
         new $.fn.oembed.OEmbedProvider("meetup", "rich", ["meetup\\.(com|ps)/.+"], "https://api.meetup.com/oembed"),
         new $.fn.oembed.OEmbedProvider("wikipedia", "rich", ["wikipedia.org/wiki/.+"],
