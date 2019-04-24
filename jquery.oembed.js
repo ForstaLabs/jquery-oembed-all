@@ -111,72 +111,6 @@
         if ($('#jqoembeddata').data(externalUrl) != undefined && embedProvider.embedtag.tag != 'iframe') {
             var oembedData = {code: $('#jqoembeddata').data(externalUrl)};
             success(oembedData, externalUrl, container, settings);
-        } else if (embedProvider.yql) {
-            var from = embedProvider.yql.from || 'htmlstring';
-            var url = embedProvider.yql.url ? embedProvider.yql.url(externalUrl) : externalUrl;
-            var query = 'SELECT * FROM ' + from
-                + ' WHERE url="' + (url) + '"'
-                + " and " + (/html/.test(from) ? 'xpath' : 'itemPath') + "='" + (embedProvider.yql.xpath || '/') + "'";
-            if (from == 'html')
-                query += " and compat='html5'";
-            var ajaxopts = $.extend({
-                url: "https://query.yahooapis.com/v1/public/yql",
-                dataType: 'jsonp',
-                data: {
-                    q: query,
-                    format: "json",
-                    env: 'store://datatables.org/alltableswithkeys',
-                    callback: "?"
-                },
-                success: function (data) {
-                    var result;
-
-                    if (embedProvider.yql.xpath && embedProvider.yql.xpath == '//meta|//title|//link') {
-                        var meta = {};
-
-                        if (data.query == null) {
-                            data.query = {};
-                        }
-                        if (data.query.results == null) {
-                            data.query.results = {"meta": []};
-                        }
-                        for (let i = 0, l = data.query.results.meta.length; i < l; i++) {
-                            var name = data.query.results.meta[i].name || data.query.results.meta[i].property || null;
-                            if (name == null) {
-                                continue;
-                            }
-                            meta[name.toLowerCase()] = data.query.results.meta[i].content;
-                        }
-                        if (!meta.hasOwnProperty("title") || !meta.hasOwnProperty("og:title")) {
-                            if (data.query.results.title != null) {
-                                meta.title = data.query.results.title;
-                            }
-                        }
-                        if (!meta.hasOwnProperty("og:image") && data.query.results.hasOwnProperty("link")) {
-                            for (let i = 0, l = data.query.results.link.length; i < l; i++) {
-                                if (data.query.results.link[i].hasOwnProperty("rel")) {
-                                    if (data.query.results.link[i].rel == "apple-touch-icon") {
-                                        if (data.query.results.link[i].href.charAt(0) == "/") {
-                                            meta["og:image"] = url.match(/^(([a-z]+:)?(\/\/)?[^/]+\/).*$/)[1] + data.query.results.link[i].href;
-                                        } else {
-                                            meta["og:image"] = data.query.results.link[i].href;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        result = embedProvider.yql.datareturn(meta);
-                    } else {
-                        result = embedProvider.yql.datareturn ? embedProvider.yql.datareturn(data.query.results) : data.query.results.result;
-                    }
-                    if (result === false)return;
-                    var oembedData = $.extend({}, result);
-                    oembedData.code = result;
-                    success(oembedData, externalUrl, container, settings);
-                },
-                error: (xhr, statusText, error) => settings.onError.call(container, error, externalUrl, embedProvider)
-            }, settings.ajaxOptions || {});
-            $.ajax(ajaxopts);
         } else if (embedProvider.templateRegex) {
             if (embedProvider.embedtag.tag !== '') {
                 var flashvars = embedProvider.embedtag.flashvars || '';
@@ -393,41 +327,9 @@
         this.maxWidth = 500;
         this.maxHeight = 400;
         extraSettings = extraSettings || {};
-        if (extraSettings.useYQL) {
-            if (extraSettings.useYQL == 'xml') {
-                extraSettings.yql = {
-                    xpath: "//oembed/html",
-                    from: 'xml',
-                    apiendpoint: this.apiendpoint,
-                    url: function (externalurl) {
-                        return this.apiendpoint + '?format=xml&url=' + externalurl;
-                    },
-                    datareturn: function (results) {
-                        return results.html.replace(/.*\[CDATA\[(.*)\]\]>$/, '$1') || '';
-                    }
-                };
-            } else {
-                extraSettings.yql = {
-                    from: 'json',
-                    apiendpoint: this.apiendpoint,
-                    url: function (externalurl) {
-                        return this.apiendpoint + '?format=json&url=' + externalurl;
-                    },
-                    datareturn: function (results) {
-                        if (results.json.type != 'video' && (results.json.url || results.json.thumbnail_url)) {
-                            return '<img src="' + (results.json.url || results.json.thumbnail_url) + '" />';
-                        }
-                        return results.json.html || '';
-                    }
-                };
-            }
-            this.apiendpoint = null;
-        }
-
         for (var property in extraSettings) {
             this[property] = extraSettings[property];
         }
-
         this.format = this.format || 'json';
         this.callbackparameter = this.callbackparameter || "callback";
         this.embedtag = this.embedtag || {tag: ""};
@@ -490,16 +392,6 @@
         //Audio
         new $.fn.oembed.OEmbedProvider("Spotify", "rich", ["open.spotify.com/(track|album|user)/"], "https://embed.spotify.com/oembed/"),
         new $.fn.oembed.OEmbedProvider("Soundcloud", "rich", ["soundcloud.com/.+", "snd.sc/.+"], "https://soundcloud.com/oembed", {format: 'js'}),
-        new $.fn.oembed.OEmbedProvider("bandcamp", "rich", ["bandcamp\\.com/album/.+"], null,
-            {
-                yql: {
-                    xpath: "//meta[contains(@content, \\'EmbeddedPlayer\\')]",
-                    from: 'html',
-                    datareturn: function (results) {
-                        return results.meta ? '<iframe width="400" height="100" src="' + results.meta.content + '" allowtransparency="true" frameborder="0"></iframe>' : false;
-                    }
-                }
-            }),
 
         //Photo
         new $.fn.oembed.OEmbedProvider("deviantart", "photo", ["deviantart.com/.+", "fav.me/.+", "deviantart.com/.+"], "https://backend.deviantart.com/oembed", {format: 'jsonp'}),
@@ -511,13 +403,6 @@
             {templateRegex: /.*ly\/([^/]+).*/, embedtag: {tag: 'img'}, nocache: 1}),
         new $.fn.oembed.OEmbedProvider("imgur.com", "photo", ["imgur\\.com/gallery/.+"], "https://imgur.com/$1l.jpg",
             {templateRegex: /.*gallery\/([^/]+).*/, embedtag: {tag: 'img'}, nocache: 1}),
-        new $.fn.oembed.OEmbedProvider("visual.ly", "rich", ["visual\\.ly/.+"], null,
-            {
-                yql: {
-                    xpath: "//a[@id=\\'gc_article_graphic_image\\']/img",
-                    from: 'htmlstring'
-                }
-            }),
 
         //Rich
         new $.fn.oembed.OEmbedProvider("twitter", "rich", ["twitter.com/.+"], "https://publish.twitter.com/oembed"),
@@ -550,7 +435,6 @@
             {templateRegex: /(.*)/, embedtag: {tag: 'iframe', width: '368px', height: 'auto'}}),
         new $.fn.oembed.OEmbedProvider("pastebin", "rich", ["pastebin\\.com/[\\S]{8}"], "https://pastebin.com/embed_iframe.php?i=$1",
             {templateRegex: /.*\/(\S{8}).*/, embedtag: {tag: 'iframe', width: '100%', height: 'auto'}}),
-        new $.fn.oembed.OEmbedProvider("pastie", "rich", ["pastie\\.org/pastes/.+"], null, {yql: {xpath: '//pre[@class="textmate-source"]'}}),
         new $.fn.oembed.OEmbedProvider("github", "rich", ["gist.github.com/.+"], "https://github.com/api/oembed"),
         new $.fn.oembed.OEmbedProvider("github", "rich", ["github.com/[-.\\w@]+/[-.\\w@]+"], "https://api.github.com/repos/$1/$2?callback=?"
             , {templateRegex: /.*\/([^/]+)\/([^/]+).*/,
@@ -611,18 +495,6 @@
                     height: '240px'}
             }),
         new $.fn.oembed.OEmbedProvider("slideshare", "rich", ["slideshare.net"], "https://www.slideshare.net/api/oembed/2", {format: 'jsonp'}),
-        new $.fn.oembed.OEmbedProvider("asciiartfarts", "rich", ["asciiartfarts.com/\\d+.html"], null,
-            {
-                yql: {
-                    xpath: '//pre/font',
-                    from: 'htmlstring',
-                    datareturn: function (results) {
-                        if (!results.result)
-                            return false;
-                        return '<pre style="background-color:#000;">' + results.result + '</div>';
-                    }
-                }
-            }),
         new $.fn.oembed.OEmbedProvider("coveritlive", "rich", ["coveritlive.com/"], null, {
             templateRegex: /(.*)/,
             template: '<iframe src="$1" allowtransparency="true" scrolling="no" width="615px" frameborder="0" height="625px"></iframe>'}),
@@ -634,54 +506,5 @@
             templateRegex: /.*xkcd\.com\/([0-9]+)\/?.*/,
             templateData: data => `<img src="${data.img}" title="${data.alt}" style="max-width: 100%"/>`
         }),
-
-        //Use Open Graph Where applicable
-        new $.fn.oembed.OEmbedProvider("opengraph", "rich", [".*"], null,
-            {
-                yql: {
-                    xpath: "//meta|//title|//link",
-                    from: 'html',
-                    datareturn: function (results) {
-                        if (!results['og:title'] && results['title'] && results['description'])
-                            results['og:title'] = results['title'];
-
-                        if (!results['og:title'] && !results['title'])
-                            return false;
-
-                        var code = $('<p/>');
-                        if (results['og:video']) {
-                            var embed = $('<embed src="' + results['og:video'] + '"/>');
-                            embed.attr('type', results['og:video:type'] || "application/x-shockwave-flash")
-                                .css('max-height', defaults.maxHeight || 'auto')
-                                .css('max-width', defaults.maxWidth || 'auto');
-                            if (results['og:video:width'])
-                                embed.attr('width', results['og:video:width']);
-                            if (results['og:video:height'])
-                                embed.attr('height', results['og:video:height']);
-                            code.append(embed);
-                        } else if (results['og:image']) {
-                            var img = $('<img src="' + results['og:image'] + '">');
-                            img.css('max-height', defaults.maxHeight || 'auto').css('max-width', defaults.maxWidth || 'auto');
-                            if (results['og:image:width'])
-                                img.attr('width', results['og:image:width']);
-                            if (results['og:image:height'])
-                                img.attr('height', results['og:image:height']);
-                            code.append(img);
-                        }
-
-                        if (results['og:title'])
-                            code.append('<b>' + results['og:title'] + '</b><br/>');
-
-                        if (results['og:description'])
-                            code.append(results['og:description'] + '<br/>');
-                        else if (results['description'])
-                            code.append(results['description'] + '<br/>');
-
-                        return code;
-                    }
-                }
-            }
-        )
-
     ];
 })(self.$);
